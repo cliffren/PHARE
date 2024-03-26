@@ -1,0 +1,6 @@
+scanpy
+torch
+scikit-learn
+scipy
+celltypist
+seaborn
