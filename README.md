@@ -1,5 +1,5 @@
 # PHARE  
-PHARE (**Ph**ysiology **A**ge P**re**dictio) is a bioinformatics tool for predicting the immune age of samples from scRNA-seq data or bulk RNA-seq data.
+PHARE (**Ph**ysiology **A**ge P**re**diction) is a bioinformatics tool for predicting the immune age of samples from scRNA-seq data or bulk RNA-seq data.
 
 ## Web Tool
 We have developed a website that can be easily used. See [https://xiazlab.org/phare](https://xiazlab.org/phare) for more information.
