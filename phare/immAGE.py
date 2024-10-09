@@ -395,16 +395,19 @@ class ImmAge():
         import celltypist
         # print('preprocessing data.')
         # adata = self.preprocess(adata)
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        # 构建数据文件的相对路径
+        
         
         if self.fast_annotation:
             predictions = celltypist.annotate(adata, 
                                               majority_voting=False,
-                                              model='./model/celltypist_model_from_panage_fairSample(10w).pkl')
+                                              model=f'{current_dir}/model/celltypist_model_from_panage_fairSample(10w).pkl')
             adata.obs[celltype_column] = predictions.predicted_labels.predicted_labels.values
         else:
             predictions = celltypist.annotate(adata, 
                                               majority_voting=True,
-                                              model='./model/celltypist_model_from_panage_fairSample(10w).pkl')
+                                              model=f'{current_dir}/model/celltypist_model_from_panage_fairSample(10w).pkl')
             adata.obs[celltype_column] = predictions.predicted_labels.majority_voting.values
         
         print('celltypist: annotation done.')
@@ -701,3 +704,4 @@ class ImmAge():
         rst[f'predicted_{self.target_column}'] = pred_labels
         print('done.')
         return rst
+    
