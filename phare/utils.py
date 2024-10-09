@@ -1,10 +1,17 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pickle
+# import dill as pickle
 import os 
 import torch
 from sklearn.metrics import mean_absolute_error
 import pandas as pd 
+
+# import sys
+# sys.path.append('./phare')
+# print(sys.path)
+# print(os.getcwd())
+
 
 def plot_predictions(y_true, y_pred, xlabel='Group', band_width=10):
     plt.figure(figsize=(12, 6))
@@ -108,9 +115,10 @@ def save_model(immage, save_dir='./model'):
     print(f'save model to {save_dir}')
         
 def load_model(save_dir='./model'):
+    # from .immAGE import ImmAGE
     path=f'{save_dir}/immage.pkl'
     with open(path, 'rb') as f:
-        immage = pickle.load(f)
+        immage = pickle.load(f, fix_imports=True)
         
     if immage.backend == 'torch':    
         weight_path=f'{save_dir}/predictor_torch.pt'    
@@ -130,4 +138,52 @@ def load_model(save_dir='./model'):
             immage.predictor = pickle.load(f)
             
     return immage
+
+def save_model_dict(immage, save_dir='./model'):
+    try:
+        os.mkdir(save_dir)
+    except:
+        pass
+           
+    if immage.backend == 'torch':
+        weight_path=f'{save_dir}/predictor_torch.pt'
+        torch.save(immage.predictor.state_dict(), weight_path)
+    elif immage.backend == 'sklearn':
+        model_path = f'{save_dir}/predictor_sklearn_dict.pkl'
+        immage_predictor_dict = immage.predictor.__dict__
+        with open(model_path, 'wb') as f:
+            pickle.dump(immage_predictor_dict, f)
     
+    path=f'{save_dir}/immage_dict.pkl'
+    immage_dict = immage.__dict__
+    del immage_dict['predictor']
+    with open(path, 'wb') as f:
+        pickle.dump(immage_dict, f)
+                
+    print(f'save model.__dict__ to {save_dir}')
+    
+def load_model_dict(immage, save_dir='./model'):
+    path=f'{save_dir}/immage_dict.pkl'
+    with open(path, 'rb') as f:
+        immage_dict = pickle.load(f)
+        immage.__dict__.update(immage_dict)
+        
+    if immage.backend == 'torch':    
+        weight_path=f'{save_dir}/predictor_torch.pt'    
+        try:
+            immage.predictor.load_state_dict(torch.load(weight_path, map_location=torch.device('cpu')))
+        except:
+            print('cannot load weights, please train the model.')
+                
+        if torch.cuda.is_available():
+            immage.predictor.device = 'cuda'  
+        else:
+            immage.predictor.device = 'cpu'
+        immage.predictor.to(immage.predictor.device)
+    elif immage.backend == 'sklearn':
+        model_path = f'{save_dir}/predictor_sklearn_dict.pkl'
+        with open(model_path, 'rb') as f:
+            immage_predictor_dict = pickle.load(f)
+            immage.predictor.__dict__.update(immage_predictor_dict)
+            
+    return immage
